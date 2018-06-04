@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:mysql://rm-wz9h95286k55xg3hy.mysql.rds.aliyuncs.com:3306/taiying
+    username: tyopr
+    password: ty1234
+    type: com.alibaba.druid.pool.DruidDataSource
+mybatis:
+  mapperLocations: classpath:sqlmap/*.xml
