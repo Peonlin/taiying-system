@@ -41,6 +41,8 @@ public class ResponseResolver implements ResponseBodyAdvice<Object> {
             } else {
                 return body;
             }
+        } else if (body instanceof ResponseEntity) {
+            return body;
         } else {
             e.setCode("success");
             e.setData(body);
