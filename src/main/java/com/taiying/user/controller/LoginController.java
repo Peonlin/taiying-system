@@ -19,8 +19,8 @@ public class LoginController {
     LoginService loginService;
 
     @PostMapping("/login")
-    public String loginIntoSystem(String username, String password) throws Exception {
-        return loginService.login(username, password);
+    public String loginIntoSystem(@RequestBody UserDTO userDTO) throws Exception {
+        return loginService.login(userDTO.getUsername(), userDTO.getPwd());
     }
 
     @PostMapping("/register")
