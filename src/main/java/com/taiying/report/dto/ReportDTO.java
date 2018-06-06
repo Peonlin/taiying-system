@@ -8,6 +8,8 @@ public class ReportDTO implements Serializable {
 
     private String reportId;
 
+    private String uid;
+
     private String customerId;
 
     private String customerPhone;
@@ -35,6 +37,8 @@ public class ReportDTO implements Serializable {
     private String sex;
 
     private String customerFirstName;
+
+    private String reportDate;
 
     public String getReportId() {
         return reportId;
@@ -154,5 +158,21 @@ public class ReportDTO implements Serializable {
 
     public void setCustomerFirstName(String customerFirstName) {
         this.customerFirstName = customerFirstName;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getReportDate() {
+        return reportDate;
+    }
+
+    public void setReportDate(String reportDate) {
+        this.reportDate = reportDate;
     }
 }

@@ -3,8 +3,58 @@
 <mapper namespace="com.taiying.report.dao.ReportDAO" >
 
     <insert id="insertReport" parameterType="com.taiying.report.dto.ReportDTO">
-        insert into ty_report (uid, customer_name, customer_phone, customer_phone_3, customer_phone_4, visit_date, visit_num, sex)
+        insert into ty_report (uid, customer_name, customer_phone, customer_phone_3, customer_phone_4, visit_date, visitor_num, sex, report_date)
         value (#{uid}, #{customerName}, #{customerPhone}, #{customerPhone3}, #{customerPhone4}, str_to_date(#{visitDate}, '%Y-%m-%d %H:%i:%s'),
-        #{visitNum}, #{sex})
+        #{visitNum}, #{sex}, date(now()))
     </insert>
+
+    <select id="queryReports" parameterType="java.lang.String" resultType="com.taiying.report.dto.ReportDTO">
+        select r.id reportId,
+                r.customer_name customerName,
+                r.customer_phone customerPhone,
+                r.customer_phone_3 customerPhone3,
+                r.customer_phone_4 customerPhone4,
+                date_format(r.visit_date, '%Y-%m-%d %H:%i:%s') visitDate,
+                date_format(r.actual_visit_date, '%Y-%m-%d %H:%i:%s') actualVisitDate,
+                r.visitor_num visitNum,
+                r.confirm_flag confirmFlag,
+                r.sex sex,
+                date_format(r.report_date, '%Y-%m-%d') reportDate
+        from ty_report r
+        where r.uid = #{uid}
+        order by r.report_date desc
+    </select>
+
+    <select id="queryReportsByReportId" parameterType="java.lang.String" resultType="com.taiying.report.dto.ReportDTO">
+        select r.id reportId,
+                r.customer_name customerName,
+                r.customer_phone customerPhone,
+                r.customer_phone_3 customerPhone3,
+                r.customer_phone_4 customerPhone4,
+                date_format(r.visit_date, '%Y-%m-%d %H:%i:%s') visitDate,
+                r.visitor_num visitNum,
+                r.confirm_flag confirmFlag,
+                r.sex sex,
+                date_format(r.report_date, '%Y-%m-%d') reportDate
+        from ty_report r
+        where r.id = #{reportId}
+    </select>
+
+    <update id="updateReport" parameterType="com.taiying.report.dto.ReportDTO">
+        update ty_report set actual_visit_date = date_format(#{actualVisitDate}, '%Y-%m-%d'), customer_name = #{customerName},
+                customer_phone = #{customerPhone}, visitor_num = #{visitNum}, customer_id = #{customerId} where id = #{reportId}
+    </update>
+
+    <select id="validNewCustomer" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select customer_id from ty_customer c where c.customer_first_name = #{firstName}
+        and ((c.phone3 = #{phone3} and c.phone4 = #{phone4}) or c.phone = #{phone})
+    </select>
+
+    <insert id="addNewCustomer" parameterType="java.util.Map" keyProperty="customer_id" useGeneratedKeys="true">
+        insert into ty_customer (customer_name, phone, sex, customer_first_name, phone3, phone4) values (#{customerName}, #{phone}, #{sex}, #{firstName}, #{phone3}, #{phone4})
+    </insert>
+
+    <update id="updateCustomer" parameterType="java.lang.Integer">
+        update ty_customer set visit_count = visit_count+1 where customer_id=#{id}
+    </update>
 </mapper>
