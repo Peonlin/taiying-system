@@ -23,4 +23,16 @@
     <select id="login" parameterType="java.util.Map" resultType="java.lang.String">
         select u.uid from ty_user u where u.username = #{username} and u.pwd = #{pwd}
     </select>
+
+    <select id="getCompany" resultType="com.taiying.user.dto.CompanyDTO">
+        select company_id companyId, company_name companyName from ty_company
+    </select>
+
+    <select id="getCompanyName" resultType="java.lang.String">
+        select company_name from ty_company where company_id=#{id}
+    </select>
+
+    <insert id="insertCompany" parameterType="java.lang.String">
+        insert into ty_company (company_name) values (#{companyName})
+    </insert>
 </mapper>

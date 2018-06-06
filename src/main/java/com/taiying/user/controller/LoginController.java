@@ -1,6 +1,8 @@
 package com.taiying.user.controller;
 
 import com.alibaba.druid.util.StringUtils;
+import com.taiying.common.util.CacheUtil;
+import com.taiying.user.dto.CompanyDTO;
 import com.taiying.user.dto.UserDTO;
 import com.taiying.user.service.LoginService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.List;
 
 @RestController
 public class LoginController {
@@ -27,8 +30,17 @@ public class LoginController {
     }
 
     @GetMapping("/user")
-    public UserDTO getUser(@CookieValue("uid") String uid) {
-        //String uid = (Arrays.stream(request.getCookies()).filter(cookie -> StringUtils.equals(cookie.getName(), "uid"))).findFirst().get().getValue();
+    public UserDTO getUser(@CookieValue("uid") String uid) throws Exception {
         return loginService.getUser(uid);
+    }
+
+    @GetMapping("/company")
+    public List<CompanyDTO> getCompany() throws Exception {
+        return loginService.getCompany();
+    }
+
+    @GetMapping("/logout")
+    public void logout(@CookieValue("uid") String uid) {
+        CacheUtil.removeUserFromCache(uid);
     }
 }
