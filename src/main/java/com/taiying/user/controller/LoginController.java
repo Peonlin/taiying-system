@@ -43,4 +43,10 @@ public class LoginController {
     public void logout(@CookieValue("uid") String uid) {
         CacheUtil.removeUserFromCache(uid);
     }
+
+    @GetMapping("/agent")
+    public List<UserDTO> getAgent() throws Exception {
+        return loginService.getAgent();
+    }
+
 }

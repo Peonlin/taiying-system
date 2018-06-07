@@ -23,4 +23,6 @@ public interface LoginDAO {
     String getCompanyName(@Param("id") int id);
 
     void insertCompany(@Param("companyName") String companyName);
+
+    List<UserDTO> queryAgent();
 }

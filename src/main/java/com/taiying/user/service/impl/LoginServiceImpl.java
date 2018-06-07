@@ -64,4 +64,9 @@ public class LoginServiceImpl implements LoginService {
     public List<CompanyDTO> getCompany() throws Exception {
         return loginDAO.getCompany();
     }
+
+    @Override
+    public List<UserDTO> getAgent() throws Exception {
+        return loginDAO.queryAgent();
+    }
 }

@@ -40,6 +40,12 @@ public class ReportDTO implements Serializable {
 
     private String reportDate;
 
+    private String agentName;
+
+    private String visitCount;
+
+    private String lastVisitDate;
+
     public String getReportId() {
         return reportId;
     }
@@ -174,5 +180,29 @@ public class ReportDTO implements Serializable {
 
     public void setReportDate(String reportDate) {
         this.reportDate = reportDate;
+    }
+
+    public String getAgentName() {
+        return agentName;
+    }
+
+    public void setAgentName(String agentName) {
+        this.agentName = agentName;
+    }
+
+    public String getVisitCount() {
+        return visitCount;
+    }
+
+    public void setVisitCount(String visitCount) {
+        this.visitCount = visitCount;
+    }
+
+    public String getLastVisitDate() {
+        return lastVisitDate;
+    }
+
+    public void setLastVisitDate(String lastVisitDate) {
+        this.lastVisitDate = lastVisitDate;
     }
 }

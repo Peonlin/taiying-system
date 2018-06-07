@@ -35,4 +35,8 @@
     <insert id="insertCompany" parameterType="java.lang.String">
         insert into ty_company (company_name) values (#{companyName})
     </insert>
+
+    <select id="queryAgent" resultType="com.taiying.user.dto.UserDTO">
+        select u.uid, u.name from ty_user u where u.role = '2'
+    </select>
 </mapper>

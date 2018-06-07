@@ -8,7 +8,7 @@
         #{visitNum}, #{sex}, date(now()))
     </insert>
 
-    <select id="queryReports" parameterType="java.lang.String" resultType="com.taiying.report.dto.ReportDTO">
+    <select id="queryReports" parameterType="java.util.Map" resultType="com.taiying.report.dto.ReportDTO">
         select r.id reportId,
                 r.customer_name customerName,
                 r.customer_phone customerPhone,
@@ -19,9 +19,16 @@
                 r.visitor_num visitNum,
                 r.confirm_flag confirmFlag,
                 r.sex sex,
-                date_format(r.report_date, '%Y-%m-%d') reportDate
-        from ty_report r
-        where r.uid = #{uid}
+                date_format(r.report_date, '%Y-%m-%d') reportDate,
+                u.name agentName,
+                c.visit_count visitCount,
+                date_format(c.last_visit_date, '%Y-%m-%d') lastVisitDate
+        from ty_report r left join ty_customer c on r.customer_id = c.customer_id left join ty_user u on c.agent_id = u.uid
+        where 1 = 1 <if test="role == '1'.toString()"> and r.uid = #{uid}</if>
+        <if test="role == '2'.toString()"> and c.agent_id = #{uid}</if>
+        <if test="phone != null and phone != ''">
+            and c.phone like concat('%', #{phone}, '%')
+        </if>
         order by r.report_date desc
     </select>
 
@@ -41,8 +48,12 @@
     </select>
 
     <update id="updateReport" parameterType="com.taiying.report.dto.ReportDTO">
-        update ty_report set actual_visit_date = date_format(#{actualVisitDate}, '%Y-%m-%d'), customer_name = #{customerName},
-                customer_phone = #{customerPhone}, visitor_num = #{visitNum}, customer_id = #{customerId} where id = #{reportId}
+        update ty_report set <if test="agentId == null and agentId == ''">actual_visit_date = date_format(#{actualVisitDate}, '%Y-%m-%d'),
+                customer_name = #{customerName},
+                customer_phone = #{customerPhone}, visitor_num = #{visitNum}, customer_id = #{customerId}
+      </if>
+     <if test="agentId != null"> agent_id = #{agentId} </if>
+        where id = #{reportId}
     </update>
 
     <select id="validNewCustomer" parameterType="java.util.Map" resultType="java.lang.Integer">
@@ -51,10 +62,32 @@
     </select>
 
     <insert id="addNewCustomer" parameterType="java.util.Map" keyProperty="customer_id" useGeneratedKeys="true">
-        insert into ty_customer (customer_name, phone, sex, customer_first_name, phone3, phone4) values (#{customerName}, #{phone}, #{sex}, #{firstName}, #{phone3}, #{phone4})
+        insert into ty_customer (customer_name, phone, sex, customer_first_name, phone3, phone4, last_visit_date, company)
+         values (#{customerName}, #{phone}, #{sex}, #{firstName}, #{phone3}, #{phone4}, date(now()), #{company})
     </insert>
 
-    <update id="updateCustomer" parameterType="java.lang.Integer">
-        update ty_customer set visit_count = visit_count+1 where customer_id=#{id}
+    <update id="updateCustomer" parameterType="java.util.Map">
+        update ty_customer set
+              visit_count = visit_count+1, last_visit_date=date(now()), company = #{company}
+        where customer_id=#{id}
+    </update>
+
+    <select id="judgeValidCustomer" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(1) from ty_user u, ty_customer c where u.uid = #{uid} and c.customer_id = #{customerId}
+        and (u.company = c.company or TIMESTAMPDIFF(DAY, c.last_visit_date, date(now())) > 150)
+    </select>
+
+    <select id="queryCustomerId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        select customer_id from ty_report where id = #{reportId}
+    </select>
+
+    <update id="confirmReport" parameterType="java.util.Map">
+        update ty_report set confirm_flag = #{confirmFlag} where id = #{reportId}
+    </update>
+
+    <update id="updateCustomerForAgent" parameterType="java.util.Map">
+        update ty_customer set
+            agent_id = #{agentId}
+        where customer_id=#{id}
     </update>
 </mapper>

@@ -16,4 +16,6 @@ public interface LoginService {
     String login(String username, String pwd) throws Exception;
 
     List<CompanyDTO> getCompany() throws Exception;
+
+    List<UserDTO> getAgent() throws Exception;
 }
