@@ -3,9 +3,10 @@
 <mapper namespace="com.taiying.report.dao.ReportDAO" >
 
     <insert id="insertReport" parameterType="com.taiying.report.dto.ReportDTO">
-        insert into ty_report (uid, customer_name, customer_phone, customer_phone_3, customer_phone_4, visit_date, visitor_num, sex, report_date)
+        insert into ty_report (uid, customer_name, customer_phone, customer_phone_3, customer_phone_4, visit_date, visitor_num, sex, report_date,
+         customer_id, customer_first_name)
         value (#{uid}, #{customerName}, #{customerPhone}, #{customerPhone3}, #{customerPhone4}, str_to_date(#{visitDate}, '%Y-%m-%d %H:%i:%s'),
-        #{visitNum}, #{sex}, date(now()))
+        #{visitNum}, #{sex}, date(now()), #{customerId}, #{customerFirstName})
     </insert>
 
     <select id="queryReports" parameterType="java.util.Map" resultType="com.taiying.report.dto.ReportDTO">
@@ -14,6 +15,7 @@
                 r.customer_phone customerPhone,
                 r.customer_phone_3 customerPhone3,
                 r.customer_phone_4 customerPhone4,
+                r.uid uid,
                 date_format(r.visit_date, '%Y-%m-%d %H:%i:%s') visitDate,
                 date_format(r.actual_visit_date, '%Y-%m-%d %H:%i:%s') actualVisitDate,
                 r.visitor_num visitNum,
@@ -22,12 +24,15 @@
                 date_format(r.report_date, '%Y-%m-%d') reportDate,
                 u.name agentName,
                 c.visit_count visitCount,
-                date_format(c.last_visit_date, '%Y-%m-%d') lastVisitDate
-        from ty_report r left join ty_customer c on r.customer_id = c.customer_id left join ty_user u on c.agent_id = u.uid
+                date_format(c.last_visit_date, '%Y-%m-%d') lastVisitDate,
+                uu.name empName,
+                uu.phone empPhone,
+                uu.company empCompany
+        from ty_report r left join ty_customer c on r.customer_id = c.customer_id left join ty_user u on c.agent_id = u.uid left join ty_user uu on r.uid = uu.uid
         where 1 = 1 <if test="role == '1'.toString()"> and r.uid = #{uid}</if>
         <if test="role == '2'.toString()"> and c.agent_id = #{uid}</if>
         <if test="phone != null and phone != ''">
-            and c.phone like concat('%', #{phone}, '%')
+            and (c.phone like concat('%', #{phone}, '%') or c.phone3 like concat('%', #{phone}, '%') or c.phone4 like concat('%', #{phone}, '%'))
         </if>
         order by r.report_date desc
     </select>
@@ -48,7 +53,7 @@
     </select>
 
     <update id="updateReport" parameterType="com.taiying.report.dto.ReportDTO">
-        update ty_report set <if test="agentId == null and agentId == ''">actual_visit_date = date_format(#{actualVisitDate}, '%Y-%m-%d'),
+        update ty_report set <if test="agentId == null or agentId == ''">actual_visit_date = date_format(#{actualVisitDate}, '%Y-%m-%d'),
                 customer_name = #{customerName},
                 customer_phone = #{customerPhone}, visitor_num = #{visitNum}, customer_id = #{customerId}
       </if>
@@ -56,14 +61,14 @@
         where id = #{reportId}
     </update>
 
-    <select id="validNewCustomer" parameterType="java.util.Map" resultType="java.lang.Integer">
+    <select id="validNewCustomer" parameterType="java.util.Map" resultType="java.lang.String">
         select customer_id from ty_customer c where c.customer_first_name = #{firstName}
         and ((c.phone3 = #{phone3} and c.phone4 = #{phone4}) or c.phone = #{phone})
     </select>
 
-    <insert id="addNewCustomer" parameterType="java.util.Map" keyProperty="customer_id" useGeneratedKeys="true">
-        insert into ty_customer (customer_name, phone, sex, customer_first_name, phone3, phone4, last_visit_date, company)
-         values (#{customerName}, #{phone}, #{sex}, #{firstName}, #{phone3}, #{phone4}, date(now()), #{company})
+    <insert id="addNewCustomer" parameterType="com.taiying.report.dto.CustomerDTO">
+        insert into ty_customer (customer_id, customer_name, phone, sex, customer_first_name, phone3, phone4, last_visit_date, company)
+         values (#{customerId}, #{customerName}, #{phone}, #{sex}, #{firstName}, #{phone3}, #{phone4}, date(now()), #{company})
     </insert>
 
     <update id="updateCustomer" parameterType="java.util.Map">
@@ -77,7 +82,7 @@
         and (u.company = c.company or TIMESTAMPDIFF(DAY, c.last_visit_date, date(now())) > 150)
     </select>
 
-    <select id="queryCustomerId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    <select id="queryCustomerId" parameterType="java.lang.Integer" resultType="java.lang.String">
         select customer_id from ty_report where id = #{reportId}
     </select>
 

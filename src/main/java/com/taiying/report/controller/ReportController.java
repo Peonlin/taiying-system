@@ -38,14 +38,19 @@ public class ReportController {
     }
 
     @PutMapping("/agent")
-    public String setAgent(String agentId, String reportId) throws Exception {
-        reportService.setAgent(agentId, reportId);
+    public String setAgent(@RequestBody ReportDTO reportDTO) throws Exception {
+        reportService.setAgent(reportDTO.getAgentId(), reportDTO.getReportId());
         return "success";
     }
 
     @PutMapping("/confirm")
-    public void confirm(String reportId, String confirmFlag) throws Exception {
-        reportService.confirm(reportId, confirmFlag);
+    public void confirm(@RequestBody ReportDTO reportDTO) throws Exception {
+        reportService.confirm(reportDTO.getReportId(), reportDTO.getConfirmFlag());
     }
 
+    @PostMapping("/natural")
+    public String natural(@RequestBody ReportDTO reportDTO) throws Exception {
+        reportService.natural(reportDTO);
+        return "success";
+    }
 }

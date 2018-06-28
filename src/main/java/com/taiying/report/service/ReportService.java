@@ -15,4 +15,6 @@ public interface ReportService {
     void setAgent(String agentId, String reportId) throws Exception;
 
     void confirm(String reportId, String confirmFlag) throws Exception;
+
+    void natural(ReportDTO reportDTO) throws Exception;
 }
