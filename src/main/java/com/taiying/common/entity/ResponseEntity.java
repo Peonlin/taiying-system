@@ -2,11 +2,13 @@ package com.taiying.common.entity;
 
 public class ResponseEntity {
 
-    String code;
+    private String code;
 
-    String msg;
+    private String msg;
 
-    Object data;
+    private Object data;
+
+    private Integer totalSize;
 
     public String getCode() {
         return code;
@@ -30,5 +32,13 @@ public class ResponseEntity {
 
     public void setData(Object data) {
         this.data = data;
+    }
+
+    public Integer getTotalSize() {
+        return totalSize;
+    }
+
+    public void setTotalSize(int totalSize) {
+        this.totalSize = totalSize;
     }
 }

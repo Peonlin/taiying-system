@@ -41,13 +41,15 @@ public class ReportServiceImpl implements ReportService {
                 reportDTO.setCustomerId(i);
                 reportDTO.setCustomerFirstName(reportDTO.getCustomerName().substring(0, 1));
                 reportDTO.setUid(uid);
+                reportDTO.setEmpCompany(userDTO.getCompany());
                 reportDAO.insertReport(reportDTO);
             } else {
                 Integer j = reportDAO.judgeValidCustomer(uid, i);
                 if (j > 0) {
                     reportDTO.setCustomerId(String.valueOf(i));
-                    reportDTO.setCustomerFirstName(userDTO.getName().substring(0, 1));
+                    reportDTO.setCustomerFirstName(reportDTO.getCustomerName().substring(0, 1));
                     reportDTO.setUid(uid);
+                    reportDTO.setEmpCompany(userDTO.getCompany());
                     reportDAO.insertReport(reportDTO);
                 } else {
                     throw new Exception("报备不符合要求");
@@ -60,22 +62,46 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ReportDTO> queryReports(String uid, String reportId, String phone) throws Exception {
+    public List<ReportDTO> queryReports(String uid, String reportId, String phone, String pageNo) throws Exception {
+        Integer first = null;
+        Integer last = null;
+        if (StringUtils.isNotBlank(pageNo)) {
+            first = (Integer.valueOf(pageNo) - 1) * 50;
+            last = 50;
+        }
         UserDTO u = null;
         try {
             u = CacheUtil.getUser(uid);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return StringUtils.isNotBlank(uid) ? reportDAO.queryReports(uid, phone, u.getRole()) : reportDAO.queryReportsByReportId(reportId);
+
+        return StringUtils.isNotBlank(uid) ? reportDAO.queryReports(uid, phone, u.getRole(), first, last, u.getCompany()) : reportDAO.queryReportsByReportId(reportId);
     }
 
+    @Override
+    public Integer queryReportSize(String uid, String reportId, String phone, String pageNo) {
+        Integer first = null;
+        Integer last = null;
+        if (StringUtils.isNotBlank(pageNo)) {
+            first = (Integer.valueOf(pageNo) - 1) * 50 + 1;
+            last = Integer.valueOf(pageNo) * 50;
+        }
+        UserDTO u = null;
+        try {
+            u = CacheUtil.getUser(uid);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  reportDAO.queryReportSize(uid, phone, u.getRole(), first, last, u.getCompany());
+    }
     @Override
     public void updateReport(String uid, ReportDTO reportDTO) throws Exception {
         String i = reportDAO.queryCustomerId(Integer.valueOf(reportDTO.getReportId()));
         UserDTO u = CacheUtil.getUser(uid);
         reportDAO.updateCustomer(i, u.getCompany(), reportDTO.getCustomerName(), reportDTO.getCustomerPhone());
         reportDTO.setCustomerId(i);
+
         reportDAO.updateReport(reportDTO);
     }
 
@@ -91,6 +117,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void natural(ReportDTO reportDTO) throws Exception {
         String i = reportDAO.validNewCustomer(reportDTO.getCustomerName().substring(0, 1), reportDTO.getCustomerPhone(), reportDTO.getCustomerPhone3(), reportDTO.getCustomerPhone4());
         reportDTO.setActualVisitDate(LocalTime.now().toString());
@@ -111,14 +138,14 @@ public class ReportServiceImpl implements ReportService {
         Map<String,Object> map = new HashMap<>();
         File oldFile = new File("C:\\Users\\Sauce\\Desktop\\test6.csv");
         FileInputStream fis = new FileInputStream(oldFile);
-        InputStreamReader sr = new InputStreamReader(fis);
+        InputStreamReader sr = new InputStreamReader(fis, "gbk");
         BufferedReader br = new BufferedReader(sr);
         String line;
-        File newFile1 = new File("C:\\Users\\Sauce\\Desktop\\output4.sql");
+        File newFile1 = new File("C:\\Users\\Sauce\\Desktop\\output5.sql");
         FileOutputStream fos1 = new FileOutputStream(newFile1);
         OutputStreamWriter osw1 = new OutputStreamWriter(fos1);
         BufferedWriter bw1 = new BufferedWriter(osw1);
-        File newFile = new File("C:\\Users\\Sauce\\Desktop\\outputReport4.sql");
+        File newFile = new File("C:\\Users\\Sauce\\Desktop\\outputReport5.sql");
         FileOutputStream fos = new FileOutputStream(newFile);
         OutputStreamWriter osw = new OutputStreamWriter(fos);
         BufferedWriter bw = new BufferedWriter(osw);
@@ -131,6 +158,9 @@ public class ReportServiceImpl implements ReportService {
                 String firstName = null;
                 String phone3 = null;
                 String phone4 = null;
+                if (StringUtils.isBlank(name) || StringUtils.isBlank(phone)) {
+                    continue;
+                }
                 if (name.contains("生") || name.contains("哥") || name.contains("老师") || name.contains("总") || name.contains("政委")) {
                     if (name.startsWith("(")) {
                         name = name.substring(0,4);
@@ -151,9 +181,12 @@ public class ReportServiceImpl implements ReportService {
                 } else {
                     firstName = name.substring(0, 1);
                 }
-                if (phone.length() == 11) {
+                if (phone.length() >= 7) {
                     phone3 = phone.substring(0, 3);
-                    phone4 = phone.substring(7, 11);
+                    phone4 = phone.substring(phone.length()-4, phone.length());
+                    if (phone.length() != 11) {
+                        phone = phone3 + "****" + phone4;
+                    }
                     String key = firstName + phone3 + phone4;
                     String value = phone4;
                     if (!map.containsKey(key)) {

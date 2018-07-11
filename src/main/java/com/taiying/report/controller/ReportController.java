@@ -5,7 +5,9 @@ import com.taiying.report.service.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ReportController {
@@ -20,13 +22,16 @@ public class ReportController {
     }
 
     @GetMapping("/report")
-    public List<ReportDTO> queryReports(@CookieValue("uid")String uid, String phone) throws Exception {
-        return reportService.queryReports(uid, null, phone);
+    public Map<String,Object> queryReports(@CookieValue("uid")String uid, String phone, String pageNo) throws Exception {
+        Map<String, Object> map = new HashMap<>(2);
+        map.put("list", reportService.queryReports(uid, null, phone, pageNo));
+        map.put("size", reportService.queryReportSize(uid, null, phone, pageNo));
+        return map;
     }
 
     @GetMapping("/report/{reportId}")
     public ReportDTO queryReportById(@PathVariable String reportId) throws Exception {
-        List<ReportDTO> list = reportService.queryReports(null, reportId, null);
+        List<ReportDTO> list = reportService.queryReports(null, reportId, null, null);
         return (list == null || list.size() == 0) ? null : list.get(0);
     }
 

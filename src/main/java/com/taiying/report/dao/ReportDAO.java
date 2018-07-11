@@ -12,7 +12,8 @@ public interface ReportDAO {
 
     void insertReport(ReportDTO reportDTO);
 
-    List<ReportDTO> queryReports(@Param("uid") String uid, @Param("phone") String phone, @Param("role") String role);
+    List<ReportDTO> queryReports(@Param("uid") String uid, @Param("phone") String phone, @Param("role") String role, @Param("first") Integer first, @Param("last")Integer last,
+    @Param("company")String company);
 
     List<ReportDTO> queryReportsByReportId(@Param("reportId") String reportId);
 
@@ -31,4 +32,7 @@ public interface ReportDAO {
     void updateCustomerForAgent(@Param("id")String id, @Param("agentId") String agentId);
 
     void confirmReport(@Param("confirmFlag") String confirmFlag, @Param("reportId") Integer reportId);
+
+    Integer queryReportSize(@Param("uid") String uid, @Param("phone") String phone, @Param("role") String role, @Param("first") Integer first, @Param("last")Integer last,
+    @Param("company")String company);
 }

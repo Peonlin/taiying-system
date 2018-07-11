@@ -2,6 +2,7 @@ package com.taiying.configuration;
 
 import com.taiying.common.entity.ResponseEntity;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
@@ -39,6 +42,12 @@ public class ResponseResolver implements ResponseBodyAdvice<Object> {
                 e.setCode("fail");
                 e.setMsg((String)bodyMap.get("message"));
             } else {
+                if (bodyMap.containsKey("list")) {
+                    e.setCode("success");
+                    e.setData(bodyMap.get("list"));
+                    e.setTotalSize((Integer)bodyMap.get("size"));
+                    return e;
+                }
                 return body;
             }
         } else if (body instanceof ResponseEntity) {

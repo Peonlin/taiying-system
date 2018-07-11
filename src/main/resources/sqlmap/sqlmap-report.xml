@@ -4,9 +4,9 @@
 
     <insert id="insertReport" parameterType="com.taiying.report.dto.ReportDTO">
         insert into ty_report (uid, customer_name, customer_phone, customer_phone_3, customer_phone_4, visit_date, visitor_num, sex, report_date,
-         customer_id, customer_first_name)
+         customer_id, customer_first_name, emp_name, emp_company, emp_phone)
         value (#{uid}, #{customerName}, #{customerPhone}, #{customerPhone3}, #{customerPhone4}, str_to_date(#{visitDate}, '%Y-%m-%d %H:%i:%s'),
-        #{visitNum}, #{sex}, date(now()), #{customerId}, #{customerFirstName})
+        #{visitNum}, #{sex}, date(now()), #{customerId}, #{customerFirstName}, #{empName}, #{empCompany}, #{empPhone})
     </insert>
 
     <select id="queryReports" parameterType="java.util.Map" resultType="com.taiying.report.dto.ReportDTO">
@@ -16,6 +16,7 @@
                 r.customer_phone_3 customerPhone3,
                 r.customer_phone_4 customerPhone4,
                 r.uid uid,
+                r.customer_id customerId,
                 date_format(r.visit_date, '%Y-%m-%d %H:%i:%s') visitDate,
                 date_format(r.actual_visit_date, '%Y-%m-%d %H:%i:%s') actualVisitDate,
                 r.visitor_num visitNum,
@@ -25,16 +26,29 @@
                 u.name agentName,
                 c.visit_count visitCount,
                 date_format(c.last_visit_date, '%Y-%m-%d') lastVisitDate,
-                uu.name empName,
-                uu.phone empPhone,
-                uu.company empCompany
-        from ty_report r left join ty_customer c on r.customer_id = c.customer_id left join ty_user u on c.agent_id = u.uid left join ty_user uu on r.uid = uu.uid
-        where 1 = 1 <if test="role == '1'.toString()"> and r.uid = #{uid}</if>
+                r.emp_name empName,
+                r.emp_phone empPhone,
+                r.emp_company empCompany,
+                case when (select count(1) from ty_report re where re.customer_id = r.customer_id and re.actual_visit_date is not null) > 0 then 'Y'
+                else 'N' end isOld
+        from ty_report r left join ty_customer c on r.customer_id = c.customer_id left join ty_user u on c.agent_id = u.uid
+        where 1 = 1 <if test="role == '1'.toString()"> and r.emp_company = #{company}</if>
         <if test="role == '2'.toString()"> and c.agent_id = #{uid}</if>
         <if test="phone != null and phone != ''">
             and (c.phone like concat('%', #{phone}, '%') or c.phone3 like concat('%', #{phone}, '%') or c.phone4 like concat('%', #{phone}, '%'))
         </if>
-        order by r.report_date desc
+        order by isnull(r.report_date) - 1, r.report_date desc, r.id  desc limit #{first},#{last}
+    </select>
+
+    <select id="queryReportSize" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(1)
+        from ty_report r left join ty_customer c on r.customer_id = c.customer_id left join ty_user u on c.agent_id = u.uid
+        where 1 = 1 <if test="role == '1'.toString()"> and r.emp_company = #{company} </if>
+        <if test="role == '2'.toString()"> and c.agent_id = #{uid}</if>
+        <if test="phone != null and phone != ''">
+            and (c.phone like concat('%', #{phone}, '%') or c.phone3 like concat('%', #{phone}, '%') or c.phone4 like concat('%', #{phone}, '%'))
+        </if>
+        order by isnull(r.report_date) - 1, r.report_date desc, r.id  desc
     </select>
 
     <select id="queryReportsByReportId" parameterType="java.lang.String" resultType="com.taiying.report.dto.ReportDTO">
@@ -55,7 +69,8 @@
     <update id="updateReport" parameterType="com.taiying.report.dto.ReportDTO">
         update ty_report set <if test="agentId == null or agentId == ''">actual_visit_date = date_format(#{actualVisitDate}, '%Y-%m-%d'),
                 customer_name = #{customerName},
-                customer_phone = #{customerPhone}, visitor_num = #{visitNum}, customer_id = #{customerId}
+                customer_phone = #{customerPhone}, visitor_num = #{visitNum}, customer_id = #{customerId},
+              customer_first_name = SUBSTRING(#{customerName}, 1, 1), customer_phone_3 = SUBSTRING(#{customerPhone}, 1, 3), customer_phone_4 = SUBSTRING(#{customerPhone}, 8, 4)
       </if>
      <if test="agentId != null"> agent_id = #{agentId} </if>
         where id = #{reportId}
@@ -67,19 +82,20 @@
     </select>
 
     <insert id="addNewCustomer" parameterType="com.taiying.report.dto.CustomerDTO">
-        insert into ty_customer (customer_id, customer_name, phone, sex, customer_first_name, phone3, phone4, last_visit_date, company)
-         values (#{customerId}, #{customerName}, #{phone}, #{sex}, #{firstName}, #{phone3}, #{phone4}, date(now()), #{company})
+        insert into ty_customer (customer_id, customer_name, phone, sex, customer_first_name, phone3, phone4, company)
+         values (#{customerId}, #{customerName}, #{phone}, #{sex}, #{firstName}, #{phone3}, #{phone4}, #{company})
     </insert>
 
     <update id="updateCustomer" parameterType="java.util.Map">
         update ty_customer set
-              visit_count = visit_count+1, last_visit_date=date(now()), company = #{company}
+              visit_count = visit_count+1, last_visit_date=date(now()), company = #{company}, customer_name = #{name}, phone = #{phone},
+              customer_first_name = SUBSTRING(#{name}, 1, 1), phone3 = SUBSTRING(#{phone}, 1, 3), phone4 = SUBSTRING(#{phone}, 8, 4)
         where customer_id=#{id}
     </update>
 
     <select id="judgeValidCustomer" parameterType="java.util.Map" resultType="java.lang.Integer">
         select count(1) from ty_user u, ty_customer c where u.uid = #{uid} and c.customer_id = #{customerId}
-        and (u.company = c.company or TIMESTAMPDIFF(DAY, c.last_visit_date, date(now())) > 150)
+        and (u.company = c.company or (c.last_visit_date is not null and TIMESTAMPDIFF(DAY, c.last_visit_date, date(now())) > 150))
     </select>
 
     <select id="queryCustomerId" parameterType="java.lang.Integer" resultType="java.lang.String">
