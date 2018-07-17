@@ -62,7 +62,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ReportDTO> queryReports(String uid, String reportId, String phone, String pageNo) throws Exception {
+    public List<ReportDTO> queryReports(String uid, String reportId, String phone, String pageNo, String startDate, String endDate) throws Exception {
         Integer first = null;
         Integer last = null;
         if (StringUtils.isNotBlank(pageNo)) {
@@ -76,11 +76,11 @@ public class ReportServiceImpl implements ReportService {
             e.printStackTrace();
         }
 
-        return StringUtils.isNotBlank(uid) ? reportDAO.queryReports(uid, phone, u.getRole(), first, last, u.getCompany()) : reportDAO.queryReportsByReportId(reportId);
+        return StringUtils.isNotBlank(uid) ? reportDAO.queryReports(uid, phone, u.getRole(), first, last, u.getCompany(), startDate, endDate) : reportDAO.queryReportsByReportId(reportId);
     }
 
     @Override
-    public Integer queryReportSize(String uid, String reportId, String phone, String pageNo) {
+    public Integer queryReportSize(String uid, String reportId, String phone, String pageNo, String startDate, String endDate) {
         Integer first = null;
         Integer last = null;
         if (StringUtils.isNotBlank(pageNo)) {
@@ -93,7 +93,7 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return  reportDAO.queryReportSize(uid, phone, u.getRole(), first, last, u.getCompany());
+        return  reportDAO.queryReportSize(uid, phone, u.getRole(), first, last, u.getCompany(), startDate, endDate);
     }
     @Override
     public void updateReport(String uid, ReportDTO reportDTO) throws Exception {

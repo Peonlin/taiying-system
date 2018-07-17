@@ -8,9 +8,9 @@ public interface ReportService {
 
     void insertReport(String uid, ReportDTO reportDTO) throws Exception;
 
-    List<ReportDTO> queryReports(String uid, String reportId, String phone, String pageNo) throws Exception;
+    List<ReportDTO> queryReports(String uid, String reportId, String phone, String pageNo, String startDate, String endDate) throws Exception;
 
-    Integer queryReportSize(String uid, String reportId, String phone, String pageNo);
+    Integer queryReportSize(String uid, String reportId, String phone, String pageNo, String startDate, String endDate);
 
     void updateReport(String uid, ReportDTO reportDTO) throws Exception;
 

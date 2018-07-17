@@ -22,16 +22,16 @@ public class ReportController {
     }
 
     @GetMapping("/report")
-    public Map<String,Object> queryReports(@CookieValue("uid")String uid, String phone, String pageNo) throws Exception {
+    public Map<String,Object> queryReports(@CookieValue("uid")String uid, String phone, String pageNo, String startDate, String endDate) throws Exception {
         Map<String, Object> map = new HashMap<>(2);
-        map.put("list", reportService.queryReports(uid, null, phone, pageNo));
-        map.put("size", reportService.queryReportSize(uid, null, phone, pageNo));
+        map.put("list", reportService.queryReports(uid, null, phone, pageNo, startDate, endDate));
+        map.put("size", reportService.queryReportSize(uid, null, phone, pageNo, startDate, endDate));
         return map;
     }
 
     @GetMapping("/report/{reportId}")
     public ReportDTO queryReportById(@PathVariable String reportId) throws Exception {
-        List<ReportDTO> list = reportService.queryReports(null, reportId, null, null);
+        List<ReportDTO> list = reportService.queryReports(null, reportId, null, null, null, null);
         return (list == null || list.size() == 0) ? null : list.get(0);
     }
 

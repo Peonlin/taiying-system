@@ -37,6 +37,12 @@
         <if test="phone != null and phone != ''">
             and (c.phone like concat('%', #{phone}, '%') or c.phone3 like concat('%', #{phone}, '%') or c.phone4 like concat('%', #{phone}, '%'))
         </if>
+        <if test="startDate != null and startDate != ''">
+            and r.report_date <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and r.report_date <![CDATA[ <= ]]> #{endDate}
+        </if>
         order by isnull(r.report_date) - 1, r.report_date desc, r.id  desc limit #{first},#{last}
     </select>
 
@@ -47,6 +53,12 @@
         <if test="role == '2'.toString()"> and c.agent_id = #{uid}</if>
         <if test="phone != null and phone != ''">
             and (c.phone like concat('%', #{phone}, '%') or c.phone3 like concat('%', #{phone}, '%') or c.phone4 like concat('%', #{phone}, '%'))
+        </if>
+        <if test="startDate != null and startDate != ''">
+            and r.report_date <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            and r.report_date <![CDATA[ <= ]]> #{endDate}
         </if>
         order by isnull(r.report_date) - 1, r.report_date desc, r.id  desc
     </select>
