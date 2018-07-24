@@ -1,12 +1,14 @@
 package com.taiying.report.service.impl;
 
 import com.taiying.common.util.CacheUtil;
+import com.taiying.common.util.ExcelUtil;
 import com.taiying.report.dao.ReportDAO;
 import com.taiying.report.dto.CustomerDTO;
 import com.taiying.report.dto.ReportDTO;
 import com.taiying.report.service.ReportService;
 import com.taiying.user.dto.UserDTO;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -132,6 +134,17 @@ public class ReportServiceImpl implements ReportService {
             reportDAO.updateCustomer(i, null, reportDTO.getCustomerName(), reportDTO.getCustomerPhone());
         }
         reportDAO.insertReport(reportDTO);
+    }
+
+    @Override
+    public HSSFWorkbook exportReport(String uid, String phone, String pageNo, String startDate, String endDate) throws Exception {
+        UserDTO u = CacheUtil.getUser(uid);
+        Integer size = queryReportSize(uid, null, phone, pageNo, startDate, endDate);
+        if (size.compareTo(10000) > 1) {
+            throw new Exception("导出条数过多");
+        }
+        List<ReportDTO> list = reportDAO.queryReports(uid, phone, u.getRole(), null, null, u.getCompany(), startDate, endDate);
+        return ExcelUtil.getHSSFWorkbook("导出列表", list);
     }
 
     public static void main(String[] args) throws Exception {

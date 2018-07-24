@@ -1,6 +1,7 @@
 package com.taiying.report.service;
 
 import com.taiying.report.dto.ReportDTO;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
 import java.util.List;
 
@@ -19,4 +20,6 @@ public interface ReportService {
     void confirm(String reportId, String confirmFlag) throws Exception;
 
     void natural(ReportDTO reportDTO) throws Exception;
+
+    HSSFWorkbook exportReport(String uid, String phone, String pageNo, String startDate, String endDate) throws Exception;
 }

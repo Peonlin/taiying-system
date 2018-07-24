@@ -43,7 +43,10 @@
         <if test="endDate != null and endDate != ''">
             and r.report_date <![CDATA[ <= ]]> #{endDate}
         </if>
-        order by isnull(r.report_date) - 1, r.report_date desc, r.id  desc limit #{first},#{last}
+        order by isnull(r.report_date) - 1, r.report_date desc, r.id  desc
+        <if test=" first != null">
+        limit #{first},#{last}
+        </if>
     </select>
 
     <select id="queryReportSize" parameterType="java.util.Map" resultType="java.lang.Integer">
