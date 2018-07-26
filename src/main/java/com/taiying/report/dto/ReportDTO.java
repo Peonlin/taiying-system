@@ -54,6 +54,8 @@ public class ReportDTO implements Serializable {
 
     private String agentId;
 
+    private String agentType;
+
     public String getReportId() {
         return reportId;
     }
@@ -244,5 +246,13 @@ public class ReportDTO implements Serializable {
 
     public void setAgentId(String agentId) {
         this.agentId = agentId;
+    }
+
+    public String getAgentType() {
+        return agentType;
+    }
+
+    public void setAgentType(String agentType) {
+        this.agentType = agentType;
     }
 }

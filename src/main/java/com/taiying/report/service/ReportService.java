@@ -22,4 +22,6 @@ public interface ReportService {
     void natural(ReportDTO reportDTO) throws Exception;
 
     HSSFWorkbook exportReport(String uid, String phone, String pageNo, String startDate, String endDate) throws Exception;
+
+    void setAgentType(ReportDTO reportDTO) throws Exception;
 }

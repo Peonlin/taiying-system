@@ -6,3 +6,5 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
 mybatis:
   mapperLocations: classpath:sqlmap/*.xml
+logging:
+  path: /root/

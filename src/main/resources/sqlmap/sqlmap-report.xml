@@ -30,7 +30,8 @@
                 r.emp_phone empPhone,
                 r.emp_company empCompany,
                 case when (select count(1) from ty_report re where re.customer_id = r.customer_id and re.actual_visit_date is not null) > 0 then 'Y'
-                else 'N' end isOld
+                else 'N' end isOld,
+                c.agent_type agentType
         from ty_report r left join ty_customer c on r.customer_id = c.customer_id left join ty_user u on c.agent_id = u.uid
         where 1 = 1 <if test="role == '1'.toString()"> and r.emp_company = #{company}</if>
         <if test="role == '2'.toString()"> and c.agent_id = #{uid}</if>
@@ -125,5 +126,9 @@
         update ty_customer set
             agent_id = #{agentId}
         where customer_id=#{id}
+    </update>
+
+    <update id="setAgentType" parameterType="com.taiying.report.dto.ReportDTO">
+        update ty_customer set agent_type = #{agentType} where customer_id = #{customerId}
     </update>
 </mapper>

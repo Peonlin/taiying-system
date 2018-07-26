@@ -35,4 +35,6 @@ public interface ReportDAO {
 
     Integer queryReportSize(@Param("uid") String uid, @Param("phone") String phone, @Param("role") String role, @Param("first") Integer first, @Param("last")Integer last,
     @Param("company")String company, @Param("startDate")String startDate, @Param("endDate") String endDate);
+
+    void setAgentType(ReportDTO reportDTO);
 }

@@ -10,9 +10,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 public class ReportController {
@@ -94,5 +96,17 @@ public class ReportController {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    @GetMapping("/agentType")
+    public List<String> queryAgentType() {
+        String []a = {"a", "b", "c", "d", "e", "f", "g"};
+        return Arrays.stream(a).collect(Collectors.toList());
+    }
+
+    @PutMapping("/agentType")
+    public String setAgentType(@RequestBody ReportDTO reportDTO) throws Exception {
+        reportService.setAgentType(reportDTO);
+        return "success";
     }
 }

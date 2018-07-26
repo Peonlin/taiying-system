@@ -222,4 +222,9 @@ public class ReportServiceImpl implements ReportService {
         bw1.close();
         bw.close();
     }
+
+    @Override
+    public void setAgentType(ReportDTO reportDTO) throws Exception {
+        reportDAO.setAgentType(reportDTO);
+    }
 }
